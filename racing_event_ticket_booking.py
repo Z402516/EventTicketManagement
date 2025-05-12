@@ -126,3 +126,107 @@ class SeasonMembershipTicket(Ticket):
 
     def get_ticket_type(self):
         return "SEASON_MEMBERSHIP"
+
+
+class RacingCarEvent:
+    def __init__(self, name, location, date, capacity):
+        self.__name = name
+        self.__location = location
+        self.__date = date
+        self.__capacity = capacity
+        self.__total_sales = 0
+        self.__tickets_sold = []  # List of Ticket objects
+        self.__registered_customers = []
+        self.__discount_policy = None
+
+    # Getters
+    def get_name(self):
+        return self.__name
+
+    def get_location(self):
+        return self.__location
+
+    def get_date(self):
+        return self.__date
+
+    def get_capacity(self):
+        return self.__capacity
+
+    def get_total_sales(self):
+        return self.__total_sales
+
+    def get_total_tickets_sold(self):
+        return len(self.__tickets_sold)
+
+    def get_discount_policy(self):
+        return self.__discount_policy
+
+    # Setters
+    def set_name(self, new_name):
+        self.__name = new_name
+
+    def set_location(self, new_location):
+        self.__location = new_location
+
+    def set_date(self, new_date):
+        self.__date = new_date
+
+    def set_discount_policy(self,policy):
+        self.__discount_policy = policy
+
+    # Admin methods
+
+    def get_customer_by_id(self,id):
+        '''
+        This method takes the id and returns the customer if the id matches.
+        otherwise it returns false.
+        :param id: 
+        :return: 
+        '''
+        for customer in self.__registered_customers:
+            if id == customer.get_id():
+                return customer
+
+        return False
+
+    def register_customer(self,customer):
+        '''
+        This method registers a customer.
+        :param customer: 
+        :return: 
+        '''
+        self.__registered_customers.append(customer)
+
+    def unregister_customer(self,customer):
+        '''
+        This methos unregisters a customer and removes it from the list.
+        :param customer: 
+        :return: 
+        '''
+        self.__registered_customers.remove(customer)
+
+    def add_ticket_sale(self,ticket):
+        '''
+        This method adds the ticket and adds its price into the sales of the event.
+        :param ticket: 
+        :return: 
+        '''
+        if self.get_discount_policy().is_discount_active():
+            price_after_discount = self.get_discount_policy().apply_discount(ticket.get_price())
+
+            self.__total_sales += price_after_discount
+            self.__tickets_sold.append(ticket)
+        else:
+            self.__total_sales += ticket.get_price()
+            self.__tickets_sold.append(ticket)
+
+
+    def get_total_customers(self):
+        '''
+        This returns the number of total registered customers
+        :return: 
+        '''
+        return len(self.__registered_customers)
+
+
+
