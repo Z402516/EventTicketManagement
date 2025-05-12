@@ -70,3 +70,59 @@ class Customer:
                "Email : {}\nPhone : {}\nTotal Orders : {}".format(self.get_id(),self.get_name(),
                                                                   self.get_email(),self.get_phone(),
                                                                   len(self.__purchase_history))
+
+
+
+
+class Ticket:
+    def __init__(self, price):
+        self.__price = price
+        self.__is_valid = True
+
+    def get_price(self):
+        return self.__price
+
+    def is_valid(self):
+        return self.__is_valid
+
+    def set_price(self, new_price):
+        self.__price = new_price
+
+    def invalidate(self):
+        self.__is_valid = False
+
+    def get_ticket_type(self):
+        pass
+
+class SingleRaceTicket(Ticket):
+    def __init__(self, price, seat_number):
+        super().__init__(price)
+        self.__seat_number = seat_number
+
+    def get_seat_number(self):
+        return self.__seat_number
+
+    def get_ticket_type(self):
+        return "SINGLE_RACE"
+
+class WeekendPackageTicket(Ticket):
+    def __init__(self, price, seat_number):
+        super().__init__(price)
+        self.__seat_number = seat_number
+
+    def get_seat_number(self):
+        return self.__seat_number
+
+    def get_ticket_type(self):
+        return "WEEKEND_PACKAGE"
+
+class SeasonMembershipTicket(Ticket):
+    def __init__(self, price, seat_number):
+        super().__init__(price)
+        self.__seat_number = seat_number
+
+    def get_seat_number(self):
+        return self.__seat_number
+
+    def get_ticket_type(self):
+        return "SEASON_MEMBERSHIP"
