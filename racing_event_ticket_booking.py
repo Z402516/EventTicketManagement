@@ -256,3 +256,36 @@ class DiscountPolicy:
         if self.__discount_active:
             return f"{self.__discount_percentage}% discount"
         return "No discount"
+
+# creating data storage files functions
+def create_customers_file():
+    with open("customers.pkl", "wb") as file:
+        pickle.dump([], file)
+
+
+def create_tickets_file():
+    with open("tickets.pkl", "wb") as file:
+        pickle.dump([], file)
+
+
+# creating the files
+create_customers_file()
+create_tickets_file()
+
+# creating the event object
+event = RacingCarEvent("Racing Car Event","UAE","05/09/2025",300)
+policy = DiscountPolicy(10,True)
+
+# assigning the discount policy
+event.set_discount_policy(policy)
+
+# creating customer objects
+c4 = Customer("4","Zayed","zayed@gmail.com","123456789")
+c5 = Customer("5","Ahmed","ahmed@gmail.com","123456789")
+c6 = Customer("6","Umar","umer@gmail.com","123456789")
+
+# registering the customers
+event.register_customer(c4)
+event.register_customer(c5)
+event.register_customer(c6)
+
