@@ -229,4 +229,30 @@ class RacingCarEvent:
         return len(self.__registered_customers)
 
 
+class DiscountPolicy:
+    def __init__(self, discount_pct, policy_state):
+        self.__discount_active = policy_state
+        self.__discount_percentage = discount_pct
 
+    def enable_discount(self):
+        self.__discount_active = True
+
+    def disable_discount(self):
+        self.__discount_active = False
+
+    def is_discount_active(self):
+        return self.__discount_active
+
+    def apply_discount(self, original_price):
+        """
+        Apply discount to the original price if policy is active
+        Returns discounted price or original price
+        """
+        if self.__discount_active:
+            return original_price * (1 - self.__discount_percentage / 100)
+        return original_price
+
+    def get_policy_details(self):
+        if self.__discount_active:
+            return f"{self.__discount_percentage}% discount"
+        return "No discount"
