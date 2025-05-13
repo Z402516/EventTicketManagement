@@ -1,4 +1,22 @@
 
+'''
+
+Customer
+
+Ticket (Abstract Base Class)
+
+Subclasses: SingleRaceTicket, WeekendPackageTicket, SeasonMembershipTicket
+
+RacingCarEvent
+
+DiscountPolicy
+
+PurchaseOrder
+
+'''
+
+
+
 import pickle
 
 class Customer:
@@ -559,3 +577,214 @@ class TicketBookingApp:
         ## Right panel for existing content
         right_frame = tk.Frame(content_frame)
         right_frame.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
+
+
+    def account_management_output(self, new_text):
+        """
+        This method takes in a message string and clears the previous output for
+        account management output window and displays the message.
+        """
+        # Clear the current content
+        self.output_text.config(state='normal') 
+        self.output_text.delete('1.0', tk.END) 
+
+        # Insert the new text
+        self.output_text.insert(tk.END, new_text)
+        self.output_text.config(state='disabled')  
+
+        # Auto-scroll to the bottom to show latest content
+        self.output_text.see(tk.END)
+
+    def booking_output(self, new_text):
+        """
+        This method takes in a message string and clears the previous output for
+        booking output window and displays the message.
+        """
+        # Clear the current content
+        self.booking_output_text.config(state='normal')  
+        self.booking_output_text.delete('1.0', tk.END)  
+
+        # Insert the new text
+        self.booking_output_text.insert(tk.END, new_text)
+        self.booking_output_text.config(state='disabled')  
+        
+        # Auto-scroll to the bottom to show latest content
+        self.booking_output_text.see(tk.END)
+
+    def open_add_customer_window(self):
+        '''
+        Method for a new window display for adding a new customer.
+        :return: 
+        '''
+        add_window = tk.Toplevel(self.root)
+        add_window.title("Add New Customer")
+        add_window.geometry("300x200")
+
+        # Form fields
+        tk.Label(add_window, text="ID:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
+        tk.Label(add_window, text="Name:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
+        tk.Label(add_window, text="Email:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.E)
+        tk.Label(add_window, text="Phone:").grid(row=3, column=0, padx=5, pady=5, sticky=tk.E)
+
+        self.id_entry = tk.Entry(add_window)
+        self.name_entry = tk.Entry(add_window)
+        self.email_entry = tk.Entry(add_window)
+        self.phone_entry = tk.Entry(add_window)
+
+        self.id_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.name_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.email_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.phone_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        submit_btn = tk.Button(add_window, text="Submit", command=self.submit_customer)
+        submit_btn.grid(row=4, columnspan=2, pady=10)
+
+    def submit_customer(self):
+        '''
+        This method is called when the user submits for adding a new customer.
+        It creates a customer object and registers that customer into the system as well.
+        :return: 
+        '''
+        id =  self.id_entry.get()
+        name = self.name_entry.get()
+        email = self.email_entry.get()
+        phone = self.phone_entry.get()
+
+        customer_data = {
+            "id": id,
+            "name": name,
+            "email": email,
+            "phone": phone
+        }
+
+        if id != "" and name != "" and email != "" and phone != "":
+
+            print("New Customer Details:")
+            print(f"ID: {customer_data['id']}")
+            print(f"Name: {customer_data['name']}")
+            print(f"Email: {customer_data['email']}")
+            print(f"Phone: {customer_data['phone']}")
+
+            customer = Customer(id,name,email,phone)
+            event.register_customer(customer)
+            customer.save_to_file()
+
+            current_customers = int(self.total_customers_field.get())
+            current_customers += 1
+            self.total_customers_var.set(current_customers)
+
+            self.id_entry.master.destroy()
+
+        else:
+            print("Missing Information!")
+
+    def delete_customer(self):
+        '''
+        THis method reads the id from the field and removes the customer from the event system.
+        :return: 
+        '''
+        id = self.del_entry.get()
+        customer = event.get_customer_by_id(id)
+        if customer:
+            event.unregister_customer(customer)
+            msg = "Customer with ID {} deleted.".format(id)
+            self.account_management_output(msg)
+
+        else:
+            msg = "Customer with the id {} not found".format(id)
+            self.account_management_output(msg)
+
+    def customer_details(self):
+        '''
+        This method finds the details of the customer for the given ID and displays
+        those details in the output.
+        :return: 
+        '''
+        id = self.details_entry.get()
+        customer = event.get_customer_by_id(id)
+        if customer:
+            details = customer.__str__()
+            self.account_management_output(details)
+        else:
+            msg = "Customer with the id {} not found".format(id)
+            self.account_management_output(msg)
+
+    def enable_discount_policy(self):
+        policy.enable_discount()
+        self.policy_var.set(policy.get_policy_details())
+
+    def disable_discount_policy(self):
+        policy.disable_discount()
+        self.policy_var.set(policy.get_policy_details())
+
+    def update_dashboard(self):
+        '''
+        This method refreshes the sales amount on the dashboard
+        :return: 
+        '''
+        msg = "${}".format(event.get_total_sales())
+        self.total_sales_var.set(msg)
+
+
+    def book_ticket(self):
+        '''
+        This method reads the customer id, payment method, ticket type and creates the ticket
+        and then adds that ticket into the event for keeping track of the sales also 
+        provides it to the customer.
+        '''
+        global seat_number
+
+        customer_id = self.customer_id_entry.get()
+        customer = event.get_customer_by_id(customer_id)
+        # print(customer_id)
+        if customer:
+            payment_method = self.payment_method.get()
+            ticket_type = self.ticket_type.get()
+            seat_number += 1
+            print(ticket_type)
+            if ticket_type == "Single-Race Passes":
+                ticket = SingleRaceTicket(single_race_ticket_price,seat_number)
+                event.add_ticket_sale(ticket)
+                customer.add_purchase(ticket)
+                msg = "Ticket : {} sold to\nCustomer : {}".format(ticket_type,customer.get_name())
+                self.booking_output(msg)
+
+            elif ticket_type == "Season Ticket":
+                ticket = SeasonMembershipTicket(season_membership_ticket_price,seat_number)
+                event.add_ticket_sale(ticket)
+                customer.add_purchase(ticket)
+                msg = "Ticket : {} sold to\nCustomer : {}".format(ticket_type,customer.get_name())
+                self.booking_output(msg)
+
+            elif ticket_type == "Weekend Packages":
+                ticket = WeekendPackageTicket(season_membership_ticket_price,seat_number)
+                event.add_ticket_sale(ticket)
+                customer.add_purchase(ticket)
+                msg = "Ticket : {} sold to\nCustomer : {}".format(ticket_type,customer.get_name())
+                self.booking_output(msg)
+
+            self.update_dashboard()
+        else:
+            msg = "Customer not found"
+            self.booking_output(msg)
+
+
+
+if __name__ == "__main__":
+    import tkinter as tk
+    import tkinter.font as tkfont
+    root = tk.Tk()
+    app = TicketBookingApp(root)
+    root.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
