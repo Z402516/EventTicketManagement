@@ -1,3 +1,4 @@
+
 import pickle
 
 class Customer:
@@ -71,9 +72,6 @@ class Customer:
                                                                   self.get_email(),self.get_phone(),
                                                                   len(self.__purchase_history))
 
-
-
-
 class Ticket:
     def __init__(self, price):
         self.__price = price
@@ -127,7 +125,6 @@ class SeasonMembershipTicket(Ticket):
     def get_ticket_type(self):
         return "SEASON_MEMBERSHIP"
 
-
 class RacingCarEvent:
     def __init__(self, name, location, date, capacity):
         self.__name = name
@@ -180,8 +177,8 @@ class RacingCarEvent:
         '''
         This method takes the id and returns the customer if the id matches.
         otherwise it returns false.
-        :param id: 
-        :return: 
+        :param id:
+        :return:
         '''
         for customer in self.__registered_customers:
             if id == customer.get_id():
@@ -192,24 +189,24 @@ class RacingCarEvent:
     def register_customer(self,customer):
         '''
         This method registers a customer.
-        :param customer: 
-        :return: 
+        :param customer:
+        :return:
         '''
         self.__registered_customers.append(customer)
 
     def unregister_customer(self,customer):
         '''
         This methos unregisters a customer and removes it from the list.
-        :param customer: 
-        :return: 
+        :param customer:
+        :return:
         '''
         self.__registered_customers.remove(customer)
 
     def add_ticket_sale(self,ticket):
         '''
         This method adds the ticket and adds its price into the sales of the event.
-        :param ticket: 
-        :return: 
+        :param ticket:
+        :return:
         '''
         if self.get_discount_policy().is_discount_active():
             price_after_discount = self.get_discount_policy().apply_discount(ticket.get_price())
@@ -224,7 +221,7 @@ class RacingCarEvent:
     def get_total_customers(self):
         '''
         This returns the number of total registered customers
-        :return: 
+        :return:
         '''
         return len(self.__registered_customers)
 
@@ -256,6 +253,8 @@ class DiscountPolicy:
         if self.__discount_active:
             return f"{self.__discount_percentage}% discount"
         return "No discount"
+
+
 
 # creating data storage files functions
 def create_customers_file():
@@ -289,3 +288,274 @@ event.register_customer(c4)
 event.register_customer(c5)
 event.register_customer(c6)
 
+
+single_race_ticket_price = 100
+weekend_package_ticket_price = 200
+season_membership_ticket_price = 1000
+seat_number = 0
+
+
+class TicketBookingApp:
+
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Racing Event Ticket Booking System")
+        self.root.geometry("850x500")
+        self.root.resizable(False, False)
+
+        # Create custom font
+        heading_font = tkfont.Font(family="Helvetica", size=16, weight="bold")
+        section_font = tkfont.Font(family="Helvetica", size=12, weight="bold")
+
+        # Main container frame
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
+
+        # Add the title above everything else
+        title_label = tk.Label(
+            self.main_frame,
+            text="Racing Event Ticket Booking System",
+            font=heading_font,
+            fg="#333",
+            bg="#d3d3d3",
+            pady=10
+        )
+        title_label.pack(fill=tk.X)
+
+        separator = tk.Frame(self.main_frame, height=2, bd=1, relief=tk.SUNKEN)
+        separator.pack(fill=tk.X, pady=5)
+
+        # Now create the content frames below the title
+        content_frame = tk.Frame(self.main_frame)
+        content_frame.pack(expand=True, fill=tk.BOTH)
+
+        ## Account Management Frame
+        # Left panel for account management
+        left_frame = tk.Frame(content_frame, width=250, relief=tk.RIDGE, borderwidth=2)
+        left_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10), pady=(0, 20))
+
+        # Account management heading
+        account_label = tk.Label(left_frame, text="Account Management", font=section_font)
+        account_label.pack(pady=5, anchor=tk.W)
+
+        # Add Customer button
+        add_btn = tk.Button(left_frame, text="Add Customer", bg="#4caf50",command=self.open_add_customer_window)
+        add_btn.pack(pady=5, fill=tk.X)
+
+        # Delete Customer section
+        del_frame = tk.Frame(left_frame)
+        del_frame.pack(pady=5, fill=tk.X)
+
+        tk.Button(del_frame, text="Delete Customer",command=self.delete_customer).pack(side=tk.LEFT)
+        self.del_entry = tk.Entry(del_frame, width=15)
+        self.del_entry.pack(side=tk.LEFT, padx=5)
+
+        # Customer Details section
+        details_frame = tk.Frame(left_frame)
+        details_frame.pack(pady=5, fill=tk.X)
+
+        tk.Button(details_frame, text="Customer Details",command=self.customer_details).pack(side=tk.LEFT)
+        self.details_entry = tk.Entry(details_frame, width=15)
+        self.details_entry.pack(side=tk.LEFT, padx=5)
+
+        # Add a multi-line text area for output at the bottom
+        output_label = tk.Label(left_frame, text="Output:", font=section_font)
+        output_label.pack(pady=(10, 5), anchor=tk.W)
+
+        # Create a container frame for Text + Scrollbar
+        text_frame = tk.Frame(left_frame)
+        text_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # Text widget
+        self.output_text = tk.Text(
+            text_frame,
+            height=8,
+            width=30,
+            wrap=tk.WORD,
+            state='normal',
+            padx=5,
+            pady=5
+        )
+        self.output_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Scrollbar
+        scrollbar = tk.Scrollbar(text_frame, command=self.output_text.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.output_text.config(yscrollcommand=scrollbar.set)
+
+
+
+        ## New Ticket Booking Frame (middle panel)
+        middle_frame = tk.Frame(content_frame, width=2000, relief=tk.RIDGE, borderwidth=2)
+        middle_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10), pady=(0, 20))
+
+        # Ticket Booking heading
+        ticket_label = tk.Label(middle_frame, text="Ticket Booking", font=section_font)
+        ticket_label.pack(pady=5, anchor=tk.W)
+
+        # Ticket type dropdown
+        tk.Label(middle_frame, text="Ticket Type:").pack(anchor=tk.W, padx=5, pady=(10, 0))
+        self.ticket_type = tk.StringVar()
+        ticket_options = ["Single-Race Passes", "Weekend Packages", "Season Ticket"]
+        ticket_dropdown = tk.OptionMenu(middle_frame, self.ticket_type, *ticket_options)
+        ticket_dropdown.pack(fill=tk.X, padx=5, pady=(0, 10))
+        self.ticket_type.set(ticket_options[0])  # Set default value
+
+        # Payment method dropdown
+        tk.Label(middle_frame, text="Payment Method:").pack(anchor=tk.W, padx=5)
+        self.payment_method = tk.StringVar()
+        payment_options = ["Credit Card", "Debit Card"]
+        payment_dropdown = tk.OptionMenu(middle_frame, self.payment_method, *payment_options)
+        payment_dropdown.pack(fill=tk.X, padx=5, pady=(0, 10))
+        self.payment_method.set(payment_options[0])  # Set default value
+
+        # Customer ID field
+        tk.Label(middle_frame, text="Customer ID:").pack(anchor=tk.W, padx=5)
+
+        self.customer_id_entry = tk.Entry(middle_frame,width=40)
+        self.customer_id_entry.pack(fill=tk.X, padx=5, pady=(0, 15))
+
+        # Book Ticket button
+        book_btn = tk.Button(
+            middle_frame,
+            text="Book Ticket",
+            command=self.book_ticket,  # You'll need to implement this method
+            bg="#4caf50"
+        )
+        book_btn.pack(fill=tk.X, padx=5, pady=5)
+
+        # Add output text area for booking messages
+        booking_output_label = tk.Label(middle_frame, text="Booking Status:", font=section_font)
+        booking_output_label.pack(pady=(10, 5), anchor=tk.W)
+
+        # Create frame to hold text widget and scrollbar
+        booking_text_frame = tk.Frame(middle_frame)
+        booking_text_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # Text widget for booking output
+        self.booking_output_text = tk.Text(
+            booking_text_frame,
+            height=8,
+            width=20,
+            wrap=tk.WORD,
+            state='normal',
+            padx=5,
+            pady=5
+        )
+        self.booking_output_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Scrollbar for booking output
+        booking_scrollbar = tk.Scrollbar(booking_text_frame, command=self.booking_output_text.yview)
+        booking_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.booking_output_text.config(yscrollcommand=booking_scrollbar.set)
+
+
+        ## Admin Dashboard frame
+        ## Admin Dashboard Frame (right panel)
+        admin_frame = tk.Frame(content_frame, relief=tk.RIDGE, borderwidth=2)
+        admin_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=(0, 20))
+
+        # Admin Dashboard heading
+        admin_label = tk.Label(admin_frame, text="Admin Dashboard", font=section_font)
+        admin_label.pack(pady=5, anchor=tk.W)
+
+        # Separator line (optional, matches your other frames)
+        tk.Frame(admin_frame, height=2, bd=1, relief=tk.SUNKEN).pack(fill=tk.X, pady=5)
+
+        # Total Sales section
+        sales_frame = tk.Frame(admin_frame)
+        sales_frame.pack(pady=10, padx=5, anchor=tk.W)
+
+        # Label
+        tk.Label(sales_frame, text="Total Sales:", font=('Helvetica', 10, 'bold')).pack(side=tk.LEFT)
+        self.total_sales_var = tk.StringVar()
+        self.total_sales_var.set("$0")  # Set initial value
+
+        # Read-only text field
+        self.total_sales_field = tk.Entry(
+            sales_frame,
+            width=15,
+            state='readonly',  # Makes it read-only
+            readonlybackground='white',  # Background color when readonly
+            font=('Helvetica', 10),
+            relief=tk.FLAT,  # Makes it look flat (optional)
+            textvariable = self.total_sales_var
+        )
+        self.total_sales_field.pack(side=tk.LEFT, padx=5)
+
+        # You can set initial value like this:
+        self.total_sales_field.config(state='normal')
+        self.total_sales_field.config(state='readonly')
+
+
+        # Total Customers section (new frame)
+        customers_frame = tk.Frame(admin_frame)
+        customers_frame.pack(pady=5, padx=5, anchor=tk.W)  # pady=5 for spacing
+
+        self.total_customers_var = tk.StringVar()
+        self.total_customers_var.set("{}".format(event.get_total_customers()))  # Set initial value
+
+        # Customers Label + Field
+        tk.Label(customers_frame, text="Total Customers:", font=('Helvetica', 10, 'bold')).pack(side=tk.LEFT)
+        self.total_customers_field = tk.Entry(
+            customers_frame,
+            width=15,
+            state='readonly',
+            readonlybackground='white',
+            font=('Helvetica', 10),
+            relief=tk.FLAT,
+            textvariable=self.total_customers_var
+        )
+        self.total_customers_field.pack(side=tk.LEFT, padx=5)
+
+        # to update
+        # self.total_customers_var.set(new_value)
+
+
+        # Total Customers section (new frame)
+        policy_frame = tk.Frame(admin_frame)
+        policy_frame.pack(pady=5, padx=5, anchor=tk.W)  # pady=5 for spacing
+
+        self.policy_var = tk.StringVar()
+        self.policy_var.set(policy.get_policy_details())
+
+        # Customers Label + Field
+        tk.Label(policy_frame, text="Discount Policy:", font=('Helvetica', 10, 'bold')).pack(side=tk.LEFT)
+        self.policy_field = tk.Entry(
+            policy_frame,
+            width=15,
+            state='readonly',
+            readonlybackground='white',
+            font=('Helvetica', 10),
+            relief=tk.FLAT,
+            textvariable=self.policy_var
+        )
+        self.policy_field.pack(side=tk.LEFT, padx=5)
+
+        # Discount On button
+        tk.Button(
+            admin_frame,
+            text="Discount On",
+            font=('Helvetica', 9),
+            bg='#4CAF50',
+            command=self.enable_discount_policy
+        ).pack(pady=(0, 2), padx=5, anchor=tk.W)  # Small bottom padding
+
+        # Discount Off button
+        tk.Button(
+            admin_frame,
+            text="Discount Off",
+            font=('Helvetica', 9),
+            bg='#f44336',
+            command=self.disable_discount_policy
+        ).pack(pady=(0, 5), padx=5, anchor=tk.W)  # Larger bottom padding
+
+        # Separator line (optional, matches your other frames)
+        tk.Frame(admin_frame, height=2, bd=1, relief=tk.SUNKEN).pack(fill=tk.X, pady=5)
+
+
+
+
+        ## Right panel for existing content
+        right_frame = tk.Frame(content_frame)
+        right_frame.pack(side=tk.RIGHT, expand=True, fill=tk.BOTH)
